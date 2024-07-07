@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import Optional  # Add this line
 import uuid
 import time
 import boto3
@@ -10,35 +11,23 @@ router = APIRouter()
 
 
 class TaskSchema(BaseModel):
-    title: str
     description: str
-    completed: bool
-    task_id: str
-    ttl: int
-    user_id: str
+    completed: bool = False
+    task_id: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 @router.post("/tasks", response_model=TaskSchema)
 async def create_task(task: TaskSchema):
     created_time = int(time.time())
     task_data = {
-        'task_id' : str(uuid.uuid4()),
-        'title': task.title,
+        'task_id' : f"task_{str(uuid.uuid4())}",
         'description' : task.description,
         'completed' : task.completed,
         'created_time' : created_time,
         'ttl' : int(created_time + 86400),
         'user_id' : "test-user"
     }   
-    # task_obj = await Task.create(
-    #     task_id=str(uuid.uuid4()),
-    #     user_id="test-user",  # Replace with actual user_id from auth
-    #     title=task.title,
-    #     description=task.description,
-    #     completed=task.completed,
-    #     created_time=created_time,
-    #     ttl=int(created_time + 86400)
-    # )
 
     table = get_table()
     table.put_item(Item=task_data)
@@ -46,31 +35,35 @@ async def create_task(task: TaskSchema):
 
     return task_data
 
-# @router.get("/tasks/{task_id}", response_model=TaskSchema)
-# async def get_task(task_id: str):
-#     task = await Task.get_or_none(task_id=task_id)
-#     if not task:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#     return task
+@router.get("/tasks/{task_id}")
+async def get_task(task_id: str):
+    table = get_table()
+    task = table.get_item(Key={'task_id': task_id})
+    if 'Item' not in task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
 
-# @router.put("/tasks/{task_id}", response_model=TaskSchema)
-# async def update_task(task_id: str, task: TaskSchema):
-#     task_obj = await Task.get_or_none(task_id=task_id)
-#     if not task_obj:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#     task_obj.title = task.title
-#     task_obj.description = task.description
-#     task_obj.completed = task.completed
-#     await task_obj.save()
-#     return task_obj
+@router.put("/tasks/{task_id}")
+async def update_task(task_id: str, task: TaskSchema):
+    table = get_table()
+    response = table.update_item(
+        Key={"task_id": task_id},
+        UpdateExpression="SET description = :description, completed = :completed",
+        ExpressionAttributeValues={
+            ":description": task.description,
+            ":completed": task.completed,
+        },
+        ReturnValues="ALL_NEW"
+        
+    )
+    updated_task = response.get('Attributes', {})
+    return updated_task
 
-# @router.delete("/tasks/{task_id}")
-# async def delete_task(task_id: str):
-#     task = await Task.get_or_none(task_id=task_id)
-#     if not task:
-#         raise HTTPException(status_code=404, detail="Task not found")
-#     await task.delete()
-#     return {"message": "Task deleted"}
+@router.delete("/tasks/{task_id}")
+async def delete_task(task_id: str):
+    table = get_table()
+    table.delete_item(Key={'task_id': task_id})
+    return "done"
 
 # @router.get("/tasks", response_model=list[TaskSchema])
 # async def list_tasks():
