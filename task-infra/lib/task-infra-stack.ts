@@ -9,7 +9,7 @@ export class TaskInfraStack extends cdk.Stack {
 
     // DynamoDB table
     const table = new ddb.Table(this, 'TaskTable', {
-      partitionKey: { name: 'id', type: ddb.AttributeType.STRING },
+      partitionKey: { name: 'task_id', type: ddb.AttributeType.STRING },
       billingMode: ddb.BillingMode.PAY_PER_REQUEST,
       timeToLiveAttribute: 'ttl',
     });
@@ -20,15 +20,22 @@ export class TaskInfraStack extends cdk.Stack {
       partitionKey: { name: 'user-id', type: ddb.AttributeType.STRING },
       sortKey: { name: 'created_time', type: ddb.AttributeType.NUMBER },
     });
+      // Define the Lambda layer
+      const myLayer = new lambda.LayerVersion(this, 'MyLayer', {
+          code: lambda.Code.fromAsset('../task-manager-api/layer_content.zip'),
+          compatibleRuntimes: [lambda.Runtime.PYTHON_3_12],
+          description: 'A layer that contains my library',
+        });
 
     // Lambda function
     const handler = new lambda.Function(this, 'TaskHandler', {
       runtime: lambda.Runtime.PYTHON_3_12,
       code: lambda.Code.fromAsset('../task-manager-api/app'),
-      handler: 'todo.handler',
+      handler: 'main.handler',
       environment: {
         TABLE_NAME: table.tableName,
       },
+      layers: [myLayer],  // Add the layer to the Lambda function
     });
 
     // grant the lambda role read/write permissions to our table

@@ -1,3 +1,7 @@
 !/dynamodb_local_latest/
 !/.venv/
 dynamodb_local_latest
+lib
+lambda_function.zip
+.vscode/settings.json
+task-manager-api/layer_content.zip
