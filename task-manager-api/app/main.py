@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from . import models, crud, auth
+from app import models, crud, auth
+
 from tortoise.contrib.fastapi import register_tortoise
 import os
 from dotenv import load_dotenv
