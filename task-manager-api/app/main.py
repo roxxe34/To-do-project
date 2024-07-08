@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-from app import models, crud, auth
-
+from . import models, crud, auth
 from tortoise.contrib.fastapi import register_tortoise
 import os
 from dotenv import load_dotenv
@@ -8,15 +7,16 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env file
 
 app = FastAPI()
+handler = Mangum(app)
 
-register_tortoise(
-    app,
-    db_url=os.getenv('DYNAMODB_ENDPOINT_URL'),
-    modules={'models': ['app.models']},
-    generate_schemas=True,
-    add_exception_handlers=True,
-)
 
+# register_tortoise(
+#     app,
+#     db_url=os.getenv('DYNAMODB_ENDPOINT_URL'),
+#     modules={'models': ['app.models']},
+#     generate_schemas=True,
+#     add_exception_handlers=True,
+# )
 
 @app.get("/")
 def read_root():
