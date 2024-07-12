@@ -66,10 +66,17 @@ async def delete_task(task_id: str):
     table.delete_item(Key={'task_id': task_id})
     return "done"
 
-# @router.get("/tasks", response_model=list[TaskSchema])
-# async def list_tasks():
-#     tasks = await Task.all()
-#     return tasks
+@router.get("/list_tasks/{user_id}")
+async def list_tasks(user_id: str):
+    table = get_table()
+    response = table.query(
+        IndexName="user_index",
+        KeyConditionExpression=Key("user_id").eq(user_id),
+        ScanIndexForward=False,
+        Limit=10,
+    )
+    tasks = response.get("Items")
+    return {"tasks" : tasks}
 
 def get_table():
     table_name = os.environ.get("TABLE_NAME")
