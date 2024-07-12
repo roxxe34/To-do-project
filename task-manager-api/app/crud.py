@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Form
 from pydantic import BaseModel
-from typing import Optional  # Add this line
+from typing import Optional
 import uuid
 import time
 import boto3
 import os
-from boto3.dynamodb.conditions import Key  # Add this line
+from boto3.dynamodb.conditions import Key
 
 
 router = APIRouter()
@@ -19,15 +19,15 @@ class TaskSchema(BaseModel):
 
 
 @router.post("/tasks", response_model=TaskSchema)
-async def create_task(task: TaskSchema):
+async def create_task(description: str = Form(...), completed: bool = Form(False), user_id: str = Form(...)):
     created_time = int(time.time())
     task_data = {
         'task_id' : f"task_{str(uuid.uuid4())}",
-        'description' : task.description,
-        'completed' : task.completed,
+        'description' : description,
+        'completed' : completed,
         'created_time' : created_time,
         'ttl' : int(created_time + 86400),
-        'user_id' : task.user_id
+        'user_id' : user_id
     }   
 
     table = get_table()

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
-from . import crud, auth
+from app import crud
+from app import auth
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from mangum import Mangum
@@ -11,11 +12,15 @@ handler = Mangum(app)
 
 templates = Jinja2Templates(directory="app/templates")
 
+@app.get("/")
+def helloworld():
+    return "hello world"
 
-@app.get("/", response_class=HTMLResponse)
+
+@app.get("/tasks", response_class=HTMLResponse)
 def read_root(request: Request):
     return templates.TemplateResponse(
-        request=request, name="index.html")
+        request=request, name="create_task.html")
 
 
 app.include_router(auth.router)
