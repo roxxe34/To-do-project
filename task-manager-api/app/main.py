@@ -1,26 +1,20 @@
-from fastapi import FastAPI
-from . import models, crud, auth
-from tortoise.contrib.fastapi import register_tortoise
-import os
-from dotenv import load_dotenv
+from fastapi import FastAPI, Request
+from . import crud, auth
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from mangum import Mangum
 
-load_dotenv()  # Load environment variables from .env file
+
 
 app = FastAPI()
 handler = Mangum(app)
 
+templates = Jinja2Templates(directory="app/templates")
 
-# register_tortoise(
-#     app,
-#     db_url=os.getenv('DYNAMODB_ENDPOINT_URL'),
-#     modules={'models': ['app.models']},
-#     generate_schemas=True,
-#     add_exception_handlers=True,
-# )
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+@app.get("/", response_class=HTMLResponse)
+def read_root(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="index.html")
 
 
 app.include_router(auth.router)
