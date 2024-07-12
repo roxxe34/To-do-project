@@ -5,6 +5,7 @@ import uuid
 import time
 import boto3
 import os
+from boto3.dynamodb.conditions import Key  # Add this line
 
 
 router = APIRouter()
@@ -26,7 +27,7 @@ async def create_task(task: TaskSchema):
         'completed' : task.completed,
         'created_time' : created_time,
         'ttl' : int(created_time + 86400),
-        'user_id' : "test-user"
+        'user_id' : task.user_id
     }   
 
     table = get_table()
@@ -65,10 +66,10 @@ async def delete_task(task_id: str):
     table.delete_item(Key={'task_id': task_id})
     return "done"
 
-@router.get("/tasks/{user_id}", response_model=list[TaskSchema])
-async def list_tasks(user_id: str):
-    
-    
+# @router.get("/tasks", response_model=list[TaskSchema])
+# async def list_tasks():
+#     tasks = await Task.all()
+#     return tasks
 
 def get_table():
     table_name = os.environ.get("TABLE_NAME")
