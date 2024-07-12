@@ -17,7 +17,7 @@ export class TaskInfraStack extends cdk.Stack {
     // add a secondary index
     table.addGlobalSecondaryIndex({
       indexName: 'user_index',
-      partitionKey: { name: 'user-id', type: ddb.AttributeType.STRING },
+      partitionKey: { name: 'user_id', type: ddb.AttributeType.STRING },
       sortKey: { name: 'created_time', type: ddb.AttributeType.NUMBER },
     });
       // Define the Lambda layer

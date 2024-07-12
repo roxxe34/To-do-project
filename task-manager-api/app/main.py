@@ -11,14 +11,6 @@ app = FastAPI()
 handler = Mangum(app)
 
 
-# register_tortoise(
-#     app,
-#     db_url=os.getenv('DYNAMODB_ENDPOINT_URL'),
-#     modules={'models': ['app.models']},
-#     generate_schemas=True,
-#     add_exception_handlers=True,
-# )
-
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
