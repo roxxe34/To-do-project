@@ -4,6 +4,8 @@ from app import auth
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from mangum import Mangum
+from fastapi.staticfiles import StaticFiles
+
 
 
 
@@ -17,7 +19,7 @@ def helloworld():
     return "hello world"
 
 
-@app.get("/tasks", response_class=HTMLResponse)
+@app.get("/create_task", response_class=HTMLResponse)
 def read_root(request: Request):
     return templates.TemplateResponse("create_task.html", {"request": request})
 
