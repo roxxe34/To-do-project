@@ -19,8 +19,7 @@ def helloworld():
 
 @app.get("/tasks", response_class=HTMLResponse)
 def read_root(request: Request):
-    return templates.TemplateResponse(
-        request=request, name="create_task.html")
+    return templates.TemplateResponse("create_task.html", {"request": request})
 
 
 app.include_router(auth.router)
