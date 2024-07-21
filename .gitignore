@@ -5,3 +5,4 @@ lib
 lambda_function.zip
 .vscode/settings.json
 task-manager-api/layer_content.zip
+node_modules
