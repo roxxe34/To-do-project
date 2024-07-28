@@ -89,3 +89,4 @@ def delete_task(task_id: str) -> dict:
 
 def update_task(payload: dict) -> dict:
     return requests.put(f"{ENDPOINT}/update-task", json=payload)
+

@@ -8,10 +8,12 @@ import { deleteTask, checkbox } from '../utils/api';
 interface TaskItemProps {
   task: Task;
   onTaskDeleted: () => void;
+  onTaskUpdate: (task: Task) => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskDeleted }) => {
-const [checked, setCheck] = useState(task.completed);
+const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskDeleted, onTaskUpdate }) => {
+  const [checked, setCheck] = useState(task.completed);
+
   const handleDelete = async () => {
     try {
       await deleteTask(task.task_id);
@@ -20,29 +22,28 @@ const [checked, setCheck] = useState(task.completed);
       console.error("Error deleting the task:", error);
     }
   };
-  const handleCheckboxChange = async () => {
-    try {
-        await checkbox(task.task_id, checked);
-      setCheck(!task.completed) // Toggle the completed status
-      
-      onTaskDeleted()
-    } catch (error) {
-      console.error("Error updating the task:", error);
-    }
-  };
 
+  const handleTaskUpdate = async () => {
+    const newIsDoneValue = !checked;
+    setCheck(newIsDoneValue);
+    const updatedTask: Task = {
+      ...task,
+      completed: newIsDoneValue,
+    };
+    onTaskUpdate(updatedTask);
+  };
 
 
   return (
     <li>
-      {task.description}
-      <label className="custom-checkbox">
-      <input type='checkbox' checked={checked} onChange={handleCheckboxChange}/>
-        <span></span>
-      </label>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={handleTaskUpdate}
+      />
+      <span>{task.description}</span>
       <button onClick={handleDelete}>Delete</button>
     </li>
   );
 };
-
 export default TaskItem;
